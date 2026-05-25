@@ -1,3 +1,4 @@
+html
 <!DOCTYPE html>
 <html lang="en-GB" class="dark">
 <head>
@@ -12,7 +13,7 @@
                 extend: {
                     colors: {
                         zinc: { 850: '#202024', 950: '#09090b' },
-                        neon: { blue: '#3b82f6', gold: '#fbbf24', red: '#ef4444' }
+                        neon: { blue: '#3b82f6', gold: '#fbbf24', red: '#ef4444', purple: '#8b5cf6' }
                     }
                 }
             }
@@ -21,147 +22,76 @@
     <style>
         body { font-family: system-ui, -apple-system, sans-serif; background-color: #09090b; color: #f4f4f5; }
         
-        /* Premium Keyboard Styles */
         .kb-wrapper {
-            position: relative;
-            width: 100%;
-            height: 220px;
-            background: #18181b;
-            border-radius: 8px;
-            padding: 12px;
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.8);
-            user-select: none;
-            overflow-x: auto;
-            overflow-y: hidden;
-            display: flex;
-            align-items: center;
+            position: relative; width: 100%; height: 220px; background: #18181b;
+            border-radius: 8px; padding: 12px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.8);
+            user-select: none; overflow-x: auto; overflow-y: hidden; display: flex; align-items: center;
         }
+        .kb-container { position: relative; height: 100%; display: flex; min-width: 800px; width: 100%; }
 
-        .kb-container {
-            position: relative;
-            height: 100%;
-            display: flex;
-            min-width: 800px;
-            width: 100%;
-        }
-
-        /* White Keys */
         .key-white {
-            flex: 1;
-            background: linear-gradient(to bottom, #ffffff 0%, #e4e4e7 100%);
-            border: 1px solid #a1a1aa;
-            border-radius: 0 0 6px 6px;
-            position: relative;
-            z-index: 1;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            padding-bottom: 15px;
-            color: #3f3f46;
-            font-weight: 600;
-            font-size: 0.85rem;
-            box-shadow: inset 0 -2px 5px rgba(0,0,0,0.2), 0 4px 6px rgba(0,0,0,0.3);
-            transition: all 0.1s ease;
-            cursor: pointer;
-            margin-right: 2px;
+            flex: 1; background: linear-gradient(to bottom, #ffffff 0%, #e4e4e7 100%);
+            border: 1px solid #a1a1aa; border-radius: 0 0 6px 6px; position: relative; z-index: 1;
+            display: flex; align-items: flex-end; justify-content: center; padding-bottom: 15px;
+            color: #3f3f46; font-weight: 600; font-size: 0.85rem; cursor: pointer; margin-right: 2px;
         }
         .key-white:last-child { margin-right: 0; }
-        
-        /* Black Keys */
         .key-black {
-            position: absolute;
-            background: linear-gradient(to bottom, #18181b 0%, #000000 100%);
-            border: 1px solid #000;
-            border-radius: 0 0 4px 4px;
-            z-index: 2;
-            height: 62%;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            padding-bottom: 10px;
-            color: #a1a1aa;
-            font-size: 0.75rem;
-            box-shadow: inset 0 -2px 3px rgba(255,255,255,0.1), 0 4px 8px rgba(0,0,0,0.6);
-            transition: all 0.1s ease;
-            cursor: pointer;
+            position: absolute; background: linear-gradient(to bottom, #18181b 0%, #000000 100%);
+            border: 1px solid #000; border-radius: 0 0 4px 4px; z-index: 2; height: 62%;
+            display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px;
+            color: #a1a1aa; font-size: 0.75rem; cursor: pointer;
         }
 
-        /* Dynamic States */
         .key-white.active, .key-black.active { transform: translateY(2px); }
-        
         .key-white.in-scale { background: linear-gradient(to bottom, #f0f9ff 0%, #bae6fd 100%); border-color: #7dd3fc; }
         .key-black.in-scale { background: linear-gradient(to bottom, #1e3a8a 0%, #172554 100%); border-color: #3b82f6; color: #93c5fd; }
-        
         .key-white.in-chord { background: linear-gradient(to bottom, #fef08a 0%, #facc15 100%) !important; border-color: #eab308; color: #713f12; box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); }
         .key-black.in-chord { background: linear-gradient(to bottom, #ca8a04 0%, #854d0e 100%) !important; border-color: #fef08a; color: #fef08a; box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); }
 
         .key-white.is-root::after, .key-black.is-root::after {
-            content: '';
-            position: absolute;
-            bottom: 35px;
-            width: 8px;
-            height: 8px;
-            background-color: #ef4444;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #ef4444;
+            content: ''; position: absolute; bottom: 35px; width: 8px; height: 8px;
+            background-color: #ef4444; border-radius: 50%; box-shadow: 0 0 8px #ef4444;
         }
         .key-black.is-root::after { bottom: 25px; }
-
         .out-of-scale { opacity: 0.15; pointer-events: none; }
-
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #18181b; }
         ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #52525b; }
 
-        /* Circle of Fifths */
+        /* Interactive Circle of Fifths */
         .circle-container {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            max-width: 260px;
-            margin: 0 auto;
-            border-radius: 50%;
-            border: 1px dashed #3f3f46;
+            position: relative; width: 100%; aspect-ratio: 1 / 1; max-width: 270px; margin: 0 auto;
+            border-radius: 50%; border: 1px dashed #3f3f46;
         }
         .circle-node {
-            position: absolute;
-            width: 36px;
-            height: 36px;
-            margin: -18px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.85rem;
-            background: #18181b;
-            border: 1px solid #3f3f46;
-            color: #a1a1aa;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+            position: absolute; width: 38px; height: 38px; margin: -19px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;
+            background: #18181b; border: 1px solid #3f3f46; color: #a1a1aa; cursor: pointer;
+            transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.5); z-index: 5;
         }
-        .circle-node.minor-node {
-            width: 28px;
-            height: 28px;
-            margin: -14px;
-            font-size: 0.7rem;
-            font-weight: 500;
-        }
-        .circle-node.active-major { background: #3b82f6; color: white; border-color: #60a5fa; transform: scale(1.15); box-shadow: 0 0 15px rgba(59,130,246,0.6); z-index: 10;}
-        .circle-node.active-minor { background: #fbbf24; color: #18181b; border-color: #fde047; transform: scale(1.15); box-shadow: 0 0 15px rgba(251,191,36,0.6); z-index: 10;}
-        .circle-node.highlight-related { border-color: #a1a1aa; background: #27272a; color: #f4f4f5; }
+        .circle-node:hover { background: #27272a; border-color: #71717a; transform: scale(1.1); color: #fff; z-index: 15; }
+        .circle-node.minor-node { width: 30px; height: 30px; margin: -15px; font-size: 0.7rem; font-weight: 500; }
+        
+        /* Highlight States */
+        .circle-node.in-cluster { background: #27272a; border-color: #52525b; color: #e4e4e7; box-shadow: 0 0 10px rgba(255,255,255,0.05); }
+        .circle-node.is-root-node { background: #ef4444; color: white; border-color: #f87171; transform: scale(1.2); box-shadow: 0 0 20px rgba(239,68,68,0.6); z-index: 10;}
+        
+        /* Segmented Modal Bezel */
+        .modal-bezel { display: flex; flex-wrap: wrap; gap: 4px; background: #18181b; padding: 4px; border-radius: 8px; border: 1px solid #27272a; margin-bottom: 20px; }
+        .modal-btn { flex: 1; text-align: center; font-size: 0.7rem; font-weight: 600; padding: 6px 4px; color: #a1a1aa; border-radius: 4px; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
+        .modal-btn:hover { color: #f4f4f5; }
+        .modal-btn.active { background: #3f3f46; color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body class="p-4 md:p-8 flex flex-col items-center">
 
     <div class="w-full max-w-7xl bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden">
         
-        <!-- Header -->
         <header class="bg-zinc-950 border-b border-zinc-800 p-6 md:px-8 flex justify-between items-center">
             <div>
                 <h1 class="text-3xl font-bold text-white tracking-tight">Advanced <span class="text-neon-blue">Harmonisation</span> Matrix</h1>
-                <p class="text-zinc-400 mt-1 text-sm tracking-wide uppercase">Music Theory & Synthesis Engine v2.1</p>
+                <p class="text-zinc-400 mt-1 text-sm tracking-wide uppercase">Modal Routing Engine v3.0</p>
             </div>
             <button id="init-audio" class="px-5 py-2.5 bg-neon-blue hover:bg-blue-600 text-white font-semibold rounded-lg shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all">
                 Initialise Audio Engine
@@ -170,60 +100,42 @@
 
         <div class="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
             
-            <!-- Left Panel: Controls, Theory, & Circle -->
             <div class="lg:col-span-1 space-y-6">
-                <!-- Parameters -->
+                <!-- Interactive Circle of Fifths with Bezel -->
                 <div class="bg-zinc-850 p-5 rounded-xl border border-zinc-800 shadow-inner">
-                    <h2 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">1. Global Parameters</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-zinc-300 mb-1">Root Key</label>
-                            <select id="root-select" class="w-full bg-zinc-900 border border-zinc-700 text-white p-2.5 rounded-lg focus:ring-2 focus:ring-neon-blue focus:outline-none">
-                                <option value="C">C</option><option value="C#">C# / Db</option><option value="D">D</option><option value="D#">D# / Eb</option>
-                                <option value="E">E</option><option value="F">F</option><option value="F#">F# / Gb</option><option value="G">G</option>
-                                <option value="G#">G# / Ab</option><option value="A" selected>A</option><option value="A#">A# / Bb</option><option value="B">B</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-zinc-300 mb-1">Mode / Scale</label>
-                            <select id="mode-select" class="w-full bg-zinc-900 border border-zinc-700 text-white p-2.5 rounded-lg focus:ring-2 focus:ring-neon-blue focus:outline-none">
-                                <option value="major">Major (Ionian)</option>
-                                <option value="minor" selected>Natural Minor (Aeolian)</option>
-                                <option value="harmonicMinor">Harmonic Minor</option>
-                                <option value="dorian">Dorian</option>
-                                <option value="mixolydian">Mixolydian</option>
-                            </select>
-                        </div>
-                        <div class="pt-2">
-                            <label class="flex items-center space-x-3 cursor-pointer">
-                                <input type="checkbox" id="seventh-toggle" class="form-checkbox h-5 w-5 text-neon-blue rounded border-zinc-700 bg-zinc-900 focus:ring-neon-blue focus:ring-offset-zinc-900">
-                                <span class="text-sm font-medium text-zinc-300">Enable 7th Chords</span>
-                            </label>
-                        </div>
+                    <h2 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3 text-center">Modal Mapping Interface</h2>
+                    
+                    <div class="modal-bezel" id="modal-bezel">
+                        <div class="modal-btn active" data-mode="major">Ionian</div>
+                        <div class="modal-btn" data-mode="mixolydian">Mixo</div>
+                        <div class="modal-btn" data-mode="dorian">Dorian</div>
+                        <div class="modal-btn" data-mode="minor">Aeolian</div>
+                        <div class="modal-btn" data-mode="harmonicMinor">H. Minor</div>
+                    </div>
+
+                    <p class="text-[10px] text-zinc-400 text-center mb-6 px-2">Red indicates the <strong>Modal Root</strong>. The grey cluster maps the <strong>Parent Diatonic Neighbourhood</strong>.</p>
+                    
+                    <div class="circle-container mt-2 mb-2" id="circle-container">
+                        <!-- Injected by JS -->
                     </div>
                 </div>
 
                 <!-- Theory Analysis -->
                 <div class="bg-zinc-850 p-5 rounded-xl border border-zinc-800 shadow-inner flex-grow">
-                    <h2 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">Theory Analysis</h2>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xs font-bold text-zinc-500 uppercase tracking-widest">Theory Analysis</h2>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" id="seventh-toggle" class="form-checkbox h-4 w-4 text-neon-blue rounded border-zinc-700 bg-zinc-900 focus:ring-neon-blue focus:ring-offset-zinc-900">
+                            <span class="text-xs font-medium text-zinc-300">7ths</span>
+                        </label>
+                    </div>
                     <div id="theory-panel" class="text-sm text-zinc-300 space-y-3">
                         <!-- Populated by JS -->
                     </div>
                 </div>
-
-                <!-- Circle of Fifths -->
-                <div class="bg-zinc-850 p-5 rounded-xl border border-zinc-800 shadow-inner">
-                    <h2 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4 text-center">Circle of Fifths</h2>
-                    <div class="circle-container mt-4 mb-2" id="circle-container">
-                        <!-- Injected by JS -->
-                    </div>
-                </div>
             </div>
 
-            <!-- Right Panel: Keyboard & Chords -->
             <div class="lg:col-span-3 space-y-8 flex flex-col">
-                
-                <!-- Diatonic Chords -->
                 <div>
                     <h2 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">2. Diatonic Harmony Matrix</h2>
                     <div id="chord-container" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
@@ -231,7 +143,6 @@
                     </div>
                 </div>
 
-                <!-- Keyboard Interface -->
                 <div class="flex-grow flex flex-col">
                     <div class="flex justify-between items-end mb-4">
                         <h2 class="text-xs font-bold text-zinc-500 uppercase tracking-widest">3. Execution Interface</h2>
@@ -239,13 +150,11 @@
                     </div>
                     
                     <div class="kb-wrapper">
-                        <div class="kb-container" id="keyboard">
-                            <!-- Keyboard DOM injected here -->
-                        </div>
+                        <div class="kb-container" id="keyboard"></div>
                     </div>
                     
                     <div class="mt-4 flex gap-6 text-xs text-zinc-500 justify-center">
-                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-blue-900 border border-blue-500"></div> Diatonic (Safe)</div>
+                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-blue-900 border border-blue-500"></div> Diatonic Notes</div>
                         <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-yellow-500 border border-yellow-300"></div> Active Arpeggio</div>
                         <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-red-500"></div> Root Note</div>
                     </div>
@@ -255,55 +164,38 @@
     </div>
 
 <script>
-    /** --- 1. CORE MUSIC THEORY DATA --- **/
     const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
     const CIRCLE_FIFTHS = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'G#', 'D#', 'A#', 'F'];
     const INTERVAL_NAMES = { 0: 'P1', 1: 'm2', 2: 'M2', 3: 'm3', 4: 'M3', 5: 'P4', 6: 'd5/A4', 7: 'P5', 8: 'm6', 9: 'M6', 10: 'm7', 11: 'M7' };
     
+    // circleOffset maps the geometric distance (in steps) from the Root to the Parent Major Key on the circle.
+    // ringAffinity defines whether the modal root chord is natively Major (outer) or minor (inner).
     const SCALES = {
-        major: { name: "Major (Ionian)", intervals: [2, 2, 1, 2, 2, 2, 1], numerals: ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'] },
-        minor: { name: "Natural Minor (Aeolian)", intervals: [2, 1, 2, 2, 1, 2, 2], numerals: ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'] },
-        harmonicMinor: { name: "Harmonic Minor", intervals: [2, 1, 2, 2, 1, 3, 1], numerals: ['i', 'ii°', 'III+', 'iv', 'V', 'VI', 'vii°'] },
-        dorian: { name: "Dorian", intervals: [2, 1, 2, 2, 2, 1, 2], numerals: ['i', 'ii', 'III', 'IV', 'v', 'vi°', 'VII'] },
-        mixolydian: { name: "Mixolydian", intervals: [2, 2, 1, 2, 2, 1, 2], numerals: ['I', 'ii', 'iii°', 'IV', 'v', 'vi', 'VII'] }
+        major: { name: "Ionian (Major)", intervals: [2, 2, 1, 2, 2, 2, 1], numerals: ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'], circleOffset: 0, ringAffinity: 'outer' },
+        mixolydian: { name: "Mixolydian", intervals: [2, 2, 1, 2, 2, 1, 2], numerals: ['I', 'ii', 'iii°', 'IV', 'v', 'vi', 'VII'], circleOffset: -1, ringAffinity: 'outer' },
+        dorian: { name: "Dorian", intervals: [2, 1, 2, 2, 2, 1, 2], numerals: ['i', 'ii', 'III', 'IV', 'v', 'vi°', 'VII'], circleOffset: -2, ringAffinity: 'inner' },
+        minor: { name: "Aeolian (Minor)", intervals: [2, 1, 2, 2, 1, 2, 2], numerals: ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'], circleOffset: -3, ringAffinity: 'inner' },
+        harmonicMinor: { name: "Harmonic Minor", intervals: [2, 1, 2, 2, 1, 3, 1], numerals: ['i', 'ii°', 'III+', 'iv', 'V', 'VI', 'vii°'], circleOffset: -3, ringAffinity: 'inner' } // Offset 3 for mapping the core cluster
     };
 
-    /** --- 2. STATE --- **/
-    let state = {
-        rootIndex: 9, // A
-        modeKey: 'minor',
-        useSevenths: false,
-        scaleIndices: [],
-        activeArpeggio: [],
-        activeRootIndex: null
-    };
-
-    /** --- 3. ADVANCED AUDIO ENGINE --- **/
-    let audioCtx = null;
-    let masterGain = null;
-    let compressor = null;
+    let state = { rootIndex: 0, modeKey: 'major', useSevenths: false, scaleIndices: [], activeArpeggio: [], activeRootIndex: null };
+    let audioCtx = null, masterGain = null, compressor = null;
 
     document.getElementById('init-audio').addEventListener('click', (e) => {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            
-            // Build Master Compression Bus to prevent clipping
             compressor = audioCtx.createDynamicsCompressor();
             compressor.threshold.setValueAtTime(-15, audioCtx.currentTime);
             compressor.knee.setValueAtTime(10, audioCtx.currentTime);
             compressor.ratio.setValueAtTime(6, audioCtx.currentTime);
             compressor.attack.setValueAtTime(0.003, audioCtx.currentTime);
             compressor.release.setValueAtTime(0.25, audioCtx.currentTime);
-
             masterGain = audioCtx.createGain();
-            masterGain.gain.value = 0.5; // Master headroom
-
+            masterGain.gain.value = 0.5;
             masterGain.connect(compressor);
             compressor.connect(audioCtx.destination);
         }
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         e.target.textContent = "Audio Engine Active";
         e.target.classList.replace('bg-neon-blue', 'bg-zinc-700');
         e.target.classList.replace('hover:bg-blue-600', 'hover:bg-zinc-600');
@@ -312,98 +204,61 @@
 
     function playChordTone(noteAbsoluteIndex, octaveOffset = 3) {
         if (!audioCtx || !masterGain) return;
-        
         const freq = 130.81 * Math.pow(2, (noteAbsoluteIndex + (octaveOffset - 3) * 12) / 12);
         
-        // Rhodes-style synthesis (Sine + Triangle with Low Pass)
-        const osc1 = audioCtx.createOscillator(); // Fundamental
-        const osc2 = audioCtx.createOscillator(); // Harmonics
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
         const filter = audioCtx.createBiquadFilter();
         const noteGain = audioCtx.createGain();
         
-        osc1.type = 'sine';
-        osc2.type = 'triangle';
-        osc1.frequency.value = freq;
-        osc2.frequency.value = freq;
+        osc1.type = 'sine'; osc2.type = 'triangle';
+        osc1.frequency.value = freq; osc2.frequency.value = freq;
+        filter.type = 'lowpass'; filter.frequency.value = 800;
 
-        filter.type = 'lowpass';
-        filter.frequency.value = 800; // Remove harsh highs
-
-        osc1.connect(filter);
-        osc2.connect(filter);
-        filter.connect(noteGain);
-        noteGain.connect(masterGain);
+        osc1.connect(filter); osc2.connect(filter); filter.connect(noteGain); noteGain.connect(masterGain);
         
-        osc1.start();
-        osc2.start();
-        
-        // ADSR Envelope
+        osc1.start(); osc2.start();
         const now = audioCtx.currentTime;
         noteGain.gain.setValueAtTime(0, now);
-        noteGain.gain.linearRampToValueAtTime(0.4, now + 0.02); // Fast Attack
-        noteGain.gain.exponentialRampToValueAtTime(0.15, now + 0.2); // Decay
-        noteGain.gain.exponentialRampToValueAtTime(0.001, now + 1.5); // Smooth Release
+        noteGain.gain.linearRampToValueAtTime(0.4, now + 0.02);
+        noteGain.gain.exponentialRampToValueAtTime(0.15, now + 0.2);
+        noteGain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
         
-        osc1.stop(now + 1.5);
-        osc2.stop(now + 1.5);
+        osc1.stop(now + 1.5); osc2.stop(now + 1.5);
     }
 
-    /** --- 4. THEORY LOGIC --- **/
     function calculateScale() {
         state.scaleIndices = [];
         let curr = state.rootIndex;
         state.scaleIndices.push(curr % 12);
-        
-        const intervals = SCALES[state.modeKey].intervals;
         for (let i = 0; i < 6; i++) {
-            curr += intervals[i];
+            curr += SCALES[state.modeKey].intervals[i];
             state.scaleIndices.push(curr % 12);
         }
     }
 
     function getChordNotes(degreeZeroIndexed) {
-        const notes = [];
-        notes.push(state.scaleIndices[degreeZeroIndexed]);
-        notes.push(state.scaleIndices[(degreeZeroIndexed + 2) % 7]);
-        notes.push(state.scaleIndices[(degreeZeroIndexed + 4) % 7]);
-        
-        if (state.useSevenths) {
-            notes.push(state.scaleIndices[(degreeZeroIndexed + 6) % 7]);
-        }
+        const notes = [state.scaleIndices[degreeZeroIndexed], state.scaleIndices[(degreeZeroIndexed + 2) % 7], state.scaleIndices[(degreeZeroIndexed + 4) % 7]];
+        if (state.useSevenths) notes.push(state.scaleIndices[(degreeZeroIndexed + 6) % 7]);
         return notes;
     }
 
     function analyzeChord(chordNotes) {
         const root = chordNotes[0];
-        let name = NOTES[root];
-        
-        const intervals = chordNotes.map(n => {
-            let diff = n - root;
-            if (diff < 0) diff += 12;
-            return diff;
-        });
-
-        const hasM3 = intervals.includes(4);
-        const hasm3 = intervals.includes(3);
-        const hasP5 = intervals.includes(7);
-        const hasd5 = intervals.includes(6);
-        const hasA5 = intervals.includes(8);
-        const hasm7 = intervals.includes(10);
-        const hasM7 = intervals.includes(11);
-
+        const intervals = chordNotes.map(n => (n - root < 0) ? n - root + 12 : n - root);
         let quality = "";
         
-        if (hasM3 && hasP5) quality = "Maj";
-        else if (hasm3 && hasP5) quality = "min";
-        else if (hasm3 && hasd5) quality = "dim";
-        else if (hasM3 && hasA5) quality = "aug";
+        if (intervals.includes(4) && intervals.includes(7)) quality = "Maj";
+        else if (intervals.includes(3) && intervals.includes(7)) quality = "min";
+        else if (intervals.includes(3) && intervals.includes(6)) quality = "dim";
+        else if (intervals.includes(4) && intervals.includes(8)) quality = "aug";
         
         if (state.useSevenths) {
-            if (quality === "Maj" && hasM7) quality = "Maj7";
-            else if (quality === "Maj" && hasm7) quality = "7"; 
-            else if (quality === "min" && hasm7) quality = "m7";
-            else if (quality === "min" && hasM7) quality = "m(maj7)";
-            else if (quality === "dim" && hasm7) quality = "m7b5"; 
+            if (quality === "Maj" && intervals.includes(11)) quality = "Maj7";
+            else if (quality === "Maj" && intervals.includes(10)) quality = "7"; 
+            else if (quality === "min" && intervals.includes(10)) quality = "m7";
+            else if (quality === "min" && intervals.includes(11)) quality = "m(maj7)";
+            else if (quality === "dim" && intervals.includes(10)) quality = "m7b5"; 
             else if (quality === "dim" && intervals.includes(9)) quality = "dim7"; 
         } else {
             if (quality === "min") quality = "m";
@@ -411,52 +266,33 @@
             if (quality === "aug") quality = "+";
             if (quality === "Maj") quality = "";
         }
-
-        return { name: name + quality, intervalsStruct: intervals.map(i => INTERVAL_NAMES[i]) };
+        return { name: NOTES[root] + quality, intervalsStruct: intervals.map(i => INTERVAL_NAMES[i]) };
     }
 
-    /** --- 5. RENDER LOGIC --- **/
     function renderKeyboard() {
         const kb = document.getElementById('keyboard');
         kb.innerHTML = '';
-        
-        const NUM_OCTAVES = 3;
-        const totalWhiteKeys = NUM_OCTAVES * 7;
-        const blackKeyOffsets = { 1: 0, 3: 1, 6: 3, 8: 4, 10: 5 };
         const whiteKeyNotes = [0, 2, 4, 5, 7, 9, 11];
+        const blackKeyOffsets = { 1: 0, 3: 1, 6: 3, 8: 4, 10: 5 };
 
-        let currentWhiteIndex = 0;
-
-        for (let oct = 0; oct < NUM_OCTAVES; oct++) {
+        for (let oct = 0; oct < 3; oct++) {
             for (let i = 0; i < 12; i++) {
-                const noteAbs = i;
-                const isWhite = whiteKeyNotes.includes(noteAbs);
-                const isScale = state.scaleIndices.includes(noteAbs);
-                const isArp = state.activeArpeggio.includes(noteAbs);
-                const isRoot = state.activeRootIndex === noteAbs;
-
+                const isWhite = whiteKeyNotes.includes(i);
                 const div = document.createElement('div');
-                div.className = `${isWhite ? 'key-white' : 'key-black'} ${isScale ? 'in-scale' : 'out-of-scale'} ${isArp ? 'in-chord' : ''} ${isRoot ? 'is-root' : ''}`;
+                div.className = `${isWhite ? 'key-white' : 'key-black'} ${state.scaleIndices.includes(i) ? 'in-scale' : 'out-of-scale'} ${state.activeArpeggio.includes(i) ? 'in-chord' : ''} ${state.activeRootIndex === i ? 'is-root' : ''}`;
                 
                 if (isWhite) {
-                    div.innerHTML = `<span>${NOTES[noteAbs]}</span>`;
-                    kb.appendChild(div);
-                    currentWhiteIndex++;
+                    div.innerHTML = `<span>${NOTES[i]}</span>`;
                 } else {
-                    const whiteWidthPercent = 100 / totalWhiteKeys;
-                    const prevWhiteGlobalIndex = (oct * 7) + blackKeyOffsets[noteAbs];
-                    div.style.left = `calc(${whiteWidthPercent * (prevWhiteGlobalIndex + 1)}% - 1.5%)`; 
+                    div.style.left = `calc(${(100 / 21) * ((oct * 7) + blackKeyOffsets[i] + 1)}% - 1.5%)`; 
                     div.style.width = '3%'; 
-                    div.innerHTML = `<span>${NOTES[noteAbs]}</span>`;
-                    kb.appendChild(div);
+                    div.innerHTML = `<span>${NOTES[i]}</span>`;
                 }
-
-                div.addEventListener('mousedown', () => {
-                    div.classList.add('active');
-                    playChordTone(noteAbs, oct + 3);
-                });
+                
+                div.addEventListener('mousedown', () => { div.classList.add('active'); playChordTone(i, oct + 3); });
                 div.addEventListener('mouseup', () => div.classList.remove('active'));
                 div.addEventListener('mouseleave', () => div.classList.remove('active'));
+                kb.appendChild(div);
             }
         }
     }
@@ -471,37 +307,19 @@
             const analysis = analyzeChord(chordNotes);
             const btn = document.createElement('button');
             btn.className = "flex flex-col items-center justify-center p-3 bg-zinc-850 border border-zinc-700 hover:border-neon-blue hover:bg-zinc-800 rounded-lg transition-all text-center";
-            
-            let displayNumeral = numerals[i];
-            if (state.useSevenths) displayNumeral += "7";
-
-            btn.innerHTML = `
-                <span class="text-xs font-semibold text-zinc-500 mb-1">${displayNumeral}</span>
-                <span class="text-xl font-bold text-white">${analysis.name}</span>
-            `;
-
-            btn.addEventListener('click', () => activateChord(chordNotes, analysis.name, displayNumeral, analysis.intervalsStruct));
+            btn.innerHTML = `<span class="text-xs font-semibold text-zinc-500 mb-1">${numerals[i]}${state.useSevenths ? '7' : ''}</span><span class="text-xl font-bold text-white">${analysis.name}</span>`;
+            btn.addEventListener('click', () => activateChord(chordNotes, analysis.name, numerals[i] + (state.useSevenths ? '7' : ''), analysis.intervalsStruct));
             container.appendChild(btn);
         }
     }
 
     function activateChord(chordNotes, chordName, numeral, intervalStruct) {
-        state.activeArpeggio = chordNotes;
-        state.activeRootIndex = chordNotes[0];
+        state.activeArpeggio = chordNotes; state.activeRootIndex = chordNotes[0];
+        chordNotes.forEach((note, index) => playChordTone(note, (index > 0 && note <= chordNotes[0]) ? 4 : 3));
         
-        chordNotes.forEach((note, index) => {
-            let oct = 3;
-            if (index > 0 && note <= chordNotes[0]) oct = 4; 
-            playChordTone(note, oct);
-        });
-
-        const panel = document.getElementById('theory-panel');
-        const notesNames = chordNotes.map(n => NOTES[n]).join(' - ');
-        const struct = intervalStruct.join(' - ');
-        
-        panel.innerHTML = `
+        document.getElementById('theory-panel').innerHTML = `
             <div class="border-b border-zinc-700 pb-2 mb-2">
-                <span class="block text-xs text-zinc-500 uppercase">Active Key</span>
+                <span class="block text-xs text-zinc-500 uppercase">Active Key & Mode</span>
                 <strong class="text-neon-blue text-lg">${NOTES[state.rootIndex]} ${SCALES[state.modeKey].name}</strong>
             </div>
             <div class="border-b border-zinc-700 pb-2 mb-2">
@@ -510,104 +328,94 @@
             </div>
             <div>
                 <span class="block text-xs text-zinc-500 uppercase">Arpeggio Footprint</span>
-                <span class="text-zinc-200 block">${notesNames}</span>
-                <span class="text-zinc-400 text-xs tracking-wider block mt-1">[ ${struct} ]</span>
+                <span class="text-zinc-200 block">${chordNotes.map(n => NOTES[n]).join(' - ')}</span>
+                <span class="text-zinc-400 text-xs tracking-wider block mt-1">[ ${intervalStruct.join(' - ')} ]</span>
             </div>
         `;
         renderKeyboard();
     }
 
-    function resetTheoryPanel() {
-        const panel = document.getElementById('theory-panel');
-        panel.innerHTML = `
+    function renderCircleOfFifths() {
+        const container = document.getElementById('circle-container');
+        container.innerHTML = '';
+        const center = 50, radiusMaj = 40, radiusMin = 22;
+        
+        // Modal Routing Mathematics
+        const rootCircleIndex = CIRCLE_FIFTHS.indexOf(NOTES[state.rootIndex]);
+        const offset = SCALES[state.modeKey].circleOffset;
+        
+        // Calculate Parent Major Index
+        let parentIndex = (rootCircleIndex + offset) % 12;
+        if (parentIndex < 0) parentIndex += 12;
+
+        const clusterIndices = [(parentIndex + 11) % 12, parentIndex, (parentIndex + 1) % 12];
+        const activeRing = SCALES[state.modeKey].ringAffinity;
+
+        CIRCLE_FIFTHS.forEach((note, index) => {
+            const angle = (index * 30 - 90) * (Math.PI / 180);
+            const inCluster = clusterIndices.includes(index);
+            
+            // Major Node (Outer Ring)
+            const nodeMaj = document.createElement('div');
+            const isMajRoot = (activeRing === 'outer' && index === rootCircleIndex);
+            nodeMaj.className = `circle-node ${inCluster && !isMajRoot ? 'in-cluster' : ''} ${isMajRoot ? 'is-root-node' : ''}`;
+            nodeMaj.style.left = `${center + radiusMaj * Math.cos(angle)}%`;
+            nodeMaj.style.top = `${center + radiusMaj * Math.sin(angle)}%`;
+            nodeMaj.textContent = note;
+            
+            nodeMaj.addEventListener('click', () => {
+                state.rootIndex = NOTES.indexOf(note);
+                // Force to compatible mode if mismatch
+                if (SCALES[state.modeKey].ringAffinity !== 'outer') setMode('major');
+                else updateAll();
+            });
+
+            // Minor Node (Inner Ring)
+            const relMinorNote = CIRCLE_FIFTHS[(index + 3) % 12];
+            const nodeMin = document.createElement('div');
+            const isMinRoot = (activeRing === 'inner' && ((index + 3) % 12) === rootCircleIndex);
+            nodeMin.className = `circle-node minor-node ${inCluster && !isMinRoot ? 'in-cluster' : ''} ${isMinRoot ? 'is-root-node' : ''}`;
+            nodeMin.style.left = `${center + radiusMin * Math.cos(angle)}%`;
+            nodeMin.style.top = `${center + radiusMin * Math.sin(angle)}%`;
+            nodeMin.textContent = relMinorNote + 'm';
+
+            nodeMin.addEventListener('click', () => {
+                state.rootIndex = NOTES.indexOf(relMinorNote);
+                if (SCALES[state.modeKey].ringAffinity !== 'inner') setMode('minor');
+                else updateAll();
+            });
+
+            container.appendChild(nodeMaj); container.appendChild(nodeMin);
+        });
+    }
+
+    function setMode(modeId) {
+        state.modeKey = modeId;
+        document.querySelectorAll('.modal-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.modal-btn[data-mode="${modeId}"]`).classList.add('active');
+        updateAll();
+    }
+
+    document.querySelectorAll('.modal-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => setMode(e.target.dataset.mode));
+    });
+
+    function updateAll() {
+        state.useSevenths = document.getElementById('seventh-toggle').checked;
+        state.activeArpeggio = []; state.activeRootIndex = null;
+        calculateScale(); renderChords(); renderKeyboard(); renderCircleOfFifths();
+        
+        document.getElementById('theory-panel').innerHTML = `
             <div>
-                <span class="block text-xs text-zinc-500 uppercase">Active Key</span>
+                <span class="block text-xs text-zinc-500 uppercase">Active Key & Mode</span>
                 <strong class="text-neon-blue text-lg">${NOTES[state.rootIndex]} ${SCALES[state.modeKey].name}</strong>
                 <p class="text-zinc-400 mt-2 text-xs">Select a chord from the matrix to view intervallic breakdown.</p>
             </div>
         `;
     }
 
-    function renderCircleOfFifths() {
-        const container = document.getElementById('circle-container');
-        container.innerHTML = '';
-        
-        // Container defines size via CSS aspect-ratio, use percentage for relative positioning
-        const center = 50; 
-        const radiusMaj = 40; 
-        const radiusMin = 22; 
-
-        CIRCLE_FIFTHS.forEach((note, index) => {
-            const angle = (index * 30 - 90) * (Math.PI / 180);
-            
-            // Outer Ring (Major)
-            const xMaj = center + radiusMaj * Math.cos(angle);
-            const yMaj = center + radiusMaj * Math.sin(angle);
-            
-            const nodeMaj = document.createElement('div');
-            nodeMaj.className = `circle-node`;
-            nodeMaj.style.left = `${xMaj}%`;
-            nodeMaj.style.top = `${yMaj}%`;
-            nodeMaj.textContent = note;
-            
-            const noteIndex = NOTES.indexOf(note);
-            if (state.modeKey === 'major' && state.rootIndex === noteIndex) {
-                nodeMaj.classList.add('active-major');
-            }
-
-            // Inner Ring (Minor)
-            const relMinorIndex = (index + 3) % 12;
-            const relMinorNote = CIRCLE_FIFTHS[relMinorIndex];
-            
-            const xMin = center + radiusMin * Math.cos(angle);
-            const yMin = center + radiusMin * Math.sin(angle);
-            
-            const nodeMin = document.createElement('div');
-            nodeMin.className = `circle-node minor-node`;
-            nodeMin.style.left = `${xMin}%`;
-            nodeMin.style.top = `${yMin}%`;
-            nodeMin.textContent = relMinorNote + 'm';
-
-            const absMinorIndex = NOTES.indexOf(relMinorNote);
-            if ((state.modeKey === 'minor' || state.modeKey === 'harmonicMinor') && state.rootIndex === absMinorIndex) {
-                nodeMin.classList.add('active-minor');
-                if (index === (CIRCLE_FIFTHS.indexOf(relMinorNote) - 3 + 12) % 12) {
-                    nodeMaj.classList.add('highlight-related');
-                }
-            }
-
-            container.appendChild(nodeMaj);
-            container.appendChild(nodeMin);
-        });
-    }
-
-    /** --- 6. BINDINGS --- **/
-    function updateAll() {
-        state.rootIndex = NOTES.indexOf(document.getElementById('root-select').value);
-        state.modeKey = document.getElementById('mode-select').value;
-        state.useSevenths = document.getElementById('seventh-toggle').checked;
-        state.activeArpeggio = [];
-        state.activeRootIndex = null;
-        
-        calculateScale();
-        renderChords();
-        renderKeyboard();
-        resetTheoryPanel();
-        renderCircleOfFifths();
-    }
-
-    document.getElementById('root-select').addEventListener('change', updateAll);
-    document.getElementById('mode-select').addEventListener('change', updateAll);
     document.getElementById('seventh-toggle').addEventListener('change', updateAll);
-    
-    document.getElementById('clear-kb').addEventListener('click', () => {
-        state.activeArpeggio = [];
-        state.activeRootIndex = null;
-        renderKeyboard();
-        resetTheoryPanel();
-    });
-
-    // Boot
+    document.getElementById('clear-kb').addEventListener('click', () => { state.activeArpeggio = []; state.activeRootIndex = null; renderKeyboard(); });
     updateAll();
 
 </script>
