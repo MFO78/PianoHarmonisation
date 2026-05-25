@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en-GB" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Harmonisation Matrix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        zinc: { 850: '#202024', 950: '#09090b' },
+                        neon: { blue: '#3b82f6', gold: '#fbbf24', red: '#ef4444' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: #09090b; color: #f4f4f5; }
+        
+        /* Premium Keyboard Styles */
+        .kb-wrapper {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            background: #18181b;
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.8);
+            user-select: none;
+            overflow-x: auto;
+            overflow-y: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .kb-container {
+            position: relative;
+            height: 100%;
+            display: flex;
+            min-width: 800px; /* Ensure proportional rendering on small screens */
+            width: 100%;
+        }
+
+        /* White Keys */
+        .key-white {
+            flex: 1;
+            background: linear-gradient(to bottom, #ffffff 0%, #e4e4e7 100%);
+            border: 1px solid #a1a1aa;
+            border-radius: 0 0 6px 6px;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 15px;
+            color: #3f3f46;
+            font-weight: 600;
+            font-size: 0.85rem;
+            box-shadow: inset 0 -2px 5px rgba(0,0,0,0.2), 0 4px 6px rgba(0,0,0,0.3);
+            transition: all 0.1s ease;
+            cursor: pointer;
+            margin-right: 2px;
+        }
+        .key-white:last-child { margin-right: 0; }
+        
+        /* Black Keys */
+        .key-black {
+            position: absolute;
+            background: linear-gradient(to bottom, #18181b 0%, #000000 100%);
+            border: 1px solid #000;
+            border-radius: 0 0 4px 4px;
+            z-index: 2;
+            height: 62%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 10px;
+            color: #a1a1aa;
+            font-size: 0.75rem;
+            box-shadow: inset 0 -2px 3px rgba(255,255,255,0.1), 0 4px 8px rgba(0,0,0,0.6);
+            transition: all 0.1s ease;
+            cursor: pointer;
+        }
+
+        /* Dynamic States */
+        .key-white.active, .key-black.active { transform: translateY(2px); }
+        
+        /* Diatonic Highlight (Subtle) */
+        .key-white.in-scale { background: linear-gradient(to bottom, #f0f9ff 0%, #bae6fd 100%); border-color: #7dd3fc; }
+        .key-black.in-scale { background: linear-gradient(to bottom, #1e3a8a 0%, #172554 100%); border-color: #3b82f6; color: #93c5fd; }
+        
+        /* Arpeggio Highlight (Strong) */
+        .key-white.in-chord { background: linear-gradient(to bottom, #fef08a 0%, #facc15 100%) !important; border-color: #eab308; color: #713f12; box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); }
+        .key-black.in-chord { background: linear-gradient(to bottom, #ca8a04 0%, #854d0e 100%) !important; border-color: #fef08a; color: #fef08a; box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); }
+
+        /* Root Note Indicator */
+        .key-white.is-root::after, .key-black.is-root::after {
+            content: '';
+            position: absolute;
+            bottom: 35px;
+            width: 8px;
+            height: 8px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #ef4444;
+        }
+        .key-black.is-root::after { bottom: 25px; }
+
+        /* Mute out-of-scale */
+        .out-of-scale { opacity: 0.15; pointer-events: none; }
+
+        /* Custom Scrollbar for matrix */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #18181b; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center">
+
+    <div class="w-full max-w-7xl bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden">
+        
+        <!-- Header -->
+        <header class="bg-zinc-950 border-b border-zinc-800 p-6 md:px-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-white tracking-tight">Advanced <span class="text-neon-blue">Harmonisation</span> Matrix</h1>
+                <p class="text-zinc-400 mt-1 text-sm tracking-wide uppercase">Music Theory & Arpeggio Engine v2.0</p>
+            </div>
+            <button id="init-audio" class="px-5 py-2.5 bg-neon-blue hover:bg-blue-600 text-white font-semibold rounded-lg shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all">
+                Initialise Audio Engine
+            </button>
+        </header>
+
+        <div class="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
+            
+            <!-- Left Panel: Controls & Theory -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Parameters -->
+                <div class="bg-zinc-850 p-5 rounded-xl border border-zinc-800 shadow-inner">
+                    <h2 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">1. Global Parameters</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-300 mb-1">Root Key</label>
+                            <select id="root-select" class="w-full bg-zinc-900 border border-zinc-700 text-white p-2.5 rounded-lg focus:ring-2 focus:ring-neon-blue focus:outline-none">
+                                <option value="C">C</option><option value="C#">C# / Db</option><option value="D">D</option><option value="D#">D# / Eb</option>
+                                <option value="E">E</option><option value="F">F</option><option value="F#">F# / Gb</option><option value="G">G</option>
+                                <option value="G#">G# / Ab</option><option value="A" selected>A</option><option value="A#">A# / Bb</option><option value="B">B</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-300 mb-1">Mode / Scale</label>
+                            <select id="mode-select" class="w-full bg-zinc-900 border border-zinc-700 text-white p-2.5 rounded-lg focus:ring-2 focus:ring-neon-blue focus:outline-none">
+                                <option value="major">Major (Ionian)</option>
+                                <option value="minor" selected>Natural Minor (Aeolian)</option>
+                                <option value="harmonicMinor">Harmoninc Minor</option>
+                                <option value="dorian">Dorian</option>
+                                <option value="mixolydian">Mixolydian</option>
+                            </select>
+                        </div>
+                        <div class="pt-2">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" id="seventh-toggle" class="form-checkbox h-5 w-5 text-neon-blue rounded border-zinc-700 bg-zinc-900 focus:ring-neon-blue focus:ring-offset-zinc-900">
+                                <span class="text-sm font-medium text-zinc-300">Enable 7th Chords</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Theory Analysis -->
+                <div class="bg-zinc-850 p-5 rounded-xl border border-zinc-800 shadow-inner">
+                    <h2 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">Theory Analysis</h2>
+                    <div id="theory-panel" class="text-sm text-zinc-300 space-y-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Keyboard & Chords -->
+            <div class="lg:col-span-3 space-y-8 flex flex-col">
+                
+                <!-- Diatonic Chords -->
+                <div>
+                    <h2 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">2. Diatonic Harmony Matrix</h2>
+                    <div id="chord-container" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                        <!-- Chords injected here -->
+                    </div>
+                </div>
+
+                <!-- Keyboard Interface -->
+                <div class="flex-grow flex flex-col">
+                    <div class="flex justify-between items-end mb-4">
+                        <h2 class="text-xs font-bold text-zinc-500 uppercase tracking-widest">3. Execution Interface</h2>
+                        <button id="clear-kb" class="text-xs text-neon-blue hover:text-blue-400 font-medium tracking-wide">CLEAR HIGHLIGHTS</button>
+                    </div>
+                    
+                    <div class="kb-wrapper">
+                        <div class="kb-container" id="keyboard">
+                            <!-- Keyboard DOM injected here -->
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 flex gap-6 text-xs text-zinc-500 justify-center">
+                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-blue-900 border border-blue-500"></div> Diatonic (Safe)</div>
+                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-yellow-500 border border-yellow-300"></div> Active Arpeggio</div>
+                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-red-500"></div> Root Note</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    /** --- 1. CORE MUSIC THEORY DATA --- **/
+    const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const INTERVAL_NAMES = { 0: 'P1', 1: 'm2', 2: 'M2', 3: 'm3', 4: 'M3', 5: 'P4', 6: 'd5/A4', 7: 'P5', 8: 'm6', 9: 'M6', 10: 'm7', 11: 'M7' };
+    
+    const SCALES = {
+        major: { 
+            name: "Major (Ionian)", 
+            intervals: [2, 2, 1, 2, 2, 2, 1], 
+            numerals: ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'] 
+        },
+        minor: { 
+            name: "Natural Minor (Aeolian)", 
+            intervals: [2, 1, 2, 2, 1, 2, 2], 
+            numerals: ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'] 
+        },
+        harmonicMinor: { 
+            name: "Harmonic Minor", 
+            intervals: [2, 1, 2, 2, 1, 3, 1], 
+            numerals: ['i', 'ii°', 'III+', 'iv', 'V', 'VI', 'vii°'] 
+        },
+        dorian: {
+            name: "Dorian",
+            intervals: [2, 1, 2, 2, 2, 1, 2],
+            numerals: ['i', 'ii', 'III', 'IV', 'v', 'vi°', 'VII']
+        },
+        mixolydian: {
+            name: "Mixolydian",
+            intervals: [2, 2, 1, 2, 2, 1, 2],
+            numerals: ['I', 'ii', 'iii°', 'IV', 'v', 'vi', 'VII']
+        }
+    };
+
+    /** --- 2. STATE --- **/
+    let state = {
+        rootIndex: 9, // A
+        modeKey: 'minor',
+        useSevenths: false,
+        scaleIndices: [], // Absolute indices 0-11
+        activeArpeggio: [], // Absolute indices 0-11
+        activeRootIndex: null
+    };
+
+    /** --- 3. AUDIO ENGINE --- **/
+    let audioCtx = null;
+
+    document.getElementById('init-audio').addEventListener('click', (e) => {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        e.target.textContent = "Audio Engine Active";
+        e.target.classList.replace('bg-neon-blue', 'bg-zinc-700');
+        e.target.classList.replace('hover:bg-blue-600', 'hover:bg-zinc-600');
+        e.target.classList.remove('shadow-[0_0_15px_rgba(59,130,246,0.4)]');
+    });
+
+    function playChordTone(noteAbsoluteIndex, octaveOffset = 3) {
+        if (!audioCtx) return;
+        
+        // Base C3 = 130.81 Hz
+        const freq = 130.81 * Math.pow(2, (noteAbsoluteIndex + (octaveOffset - 3) * 12) / 12);
+        
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        // Slightly richer tone
+        osc.type = 'triangle'; 
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start();
+        
+        // ADSR Envelope
+        gain.gain.setValueAtTime(0, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.05); // Attack
+        gain.gain.exponentialRampToValueAtTime(0.1, audioCtx.currentTime + 0.3); // Decay
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2.0); // Release
+        
+        osc.stop(audioCtx.currentTime + 2.0);
+    }
+
+    /** --- 4. THEORY LOGIC --- **/
+    function calculateScale() {
+        state.scaleIndices = [];
+        let curr = state.rootIndex;
+        state.scaleIndices.push(curr % 12);
+        
+        const intervals = SCALES[state.modeKey].intervals;
+        for (let i = 0; i < 6; i++) {
+            curr += intervals[i];
+            state.scaleIndices.push(curr % 12);
+        }
+    }
+
+    function getChordNotes(degreeZeroIndexed) {
+        const notes = [];
+        // Root, 3rd, 5th
+        notes.push(state.scaleIndices[degreeZeroIndexed]);
+        notes.push(state.scaleIndices[(degreeZeroIndexed + 2) % 7]);
+        notes.push(state.scaleIndices[(degreeZeroIndexed + 4) % 7]);
+        
+        // 7th
+        if (state.useSevenths) {
+            notes.push(state.scaleIndices[(degreeZeroIndexed + 6) % 7]);
+        }
+        return notes;
+    }
+
+    function analyzeChord(chordNotes) {
+        const root = chordNotes[0];
+        let name = NOTES[root];
+        
+        // Calculate intervals from root
+        const intervals = chordNotes.map(n => {
+            let diff = n - root;
+            if (diff < 0) diff += 12;
+            return diff;
+        });
+
+        const hasM3 = intervals.includes(4);
+        const hasm3 = intervals.includes(3);
+        const hasP5 = intervals.includes(7);
+        const hasd5 = intervals.includes(6);
+        const hasA5 = intervals.includes(8);
+        const hasm7 = intervals.includes(10);
+        const hasM7 = intervals.includes(11);
+
+        let quality = "";
+        
+        // Triad identification
+        if (hasM3 && hasP5) quality = "Maj";
+        else if (hasm3 && hasP5) quality = "min";
+        else if (hasm3 && hasd5) quality = "dim";
+        else if (hasM3 && hasA5) quality = "aug";
+        
+        // 7th identification
+        if (state.useSevenths) {
+            if (quality === "Maj" && hasM7) quality = "Maj7";
+            else if (quality === "Maj" && hasm7) quality = "7"; // Dominant
+            else if (quality === "min" && hasm7) quality = "m7";
+            else if (quality === "min" && hasM7) quality = "m(maj7)";
+            else if (quality === "dim" && hasm7) quality = "m7b5"; // Half-dim
+            else if (quality === "dim" && intervals.includes(9)) quality = "dim7"; // Full dim (9 is bb7)
+        } else {
+            // Adjust basic suffix
+            if (quality === "min") quality = "m";
+            if (quality === "dim") quality = "°";
+            if (quality === "aug") quality = "+";
+            if (quality === "Maj") quality = "";
+        }
+
+        return {
+            name: name + quality,
+            intervalsStruct: intervals.map(i => INTERVAL_NAMES[i])
+        };
+    }
+
+    /** --- 5. RENDER LOGIC --- **/
+    
+    function renderKeyboard() {
+        const kb = document.getElementById('keyboard');
+        kb.innerHTML = '';
+        
+        const NUM_OCTAVES = 3;
+        const totalWhiteKeys = NUM_OCTAVES * 7;
+        
+        // White keys index within an octave: 0=C, 1=D, 2=E, 3=F, 4=G, 5=A, 6=B
+        // Black keys map to percentages based on white keys.
+        // A black key visually sits between two white keys.
+        const blackKeyOffsets = {
+            1: 0, // C# is after C (index 0)
+            3: 1, // D# is after D (index 1)
+            6: 3, // F# is after F (index 3)
+            8: 4, // G# is after G (index 4)
+            10: 5 // A# is after A (index 5)
+        };
+
+        const whiteKeyNotes = [0, 2, 4, 5, 7, 9, 11]; // C, D, E, F, G, A, B
+
+        let currentWhiteIndex = 0;
+
+        for (let oct = 0; oct < NUM_OCTAVES; oct++) {
+            for (let i = 0; i < 12; i++) {
+                const noteAbs = i;
+                const isWhite = whiteKeyNotes.includes(noteAbs);
+                const isScale = state.scaleIndices.includes(noteAbs);
+                const isArp = state.activeArpeggio.includes(noteAbs);
+                const isRoot = state.activeRootIndex === noteAbs;
+
+                const div = document.createElement('div');
+                div.className = `${isWhite ? 'key-white' : 'key-black'} ${isScale ? 'in-scale' : 'out-of-scale'} ${isArp ? 'in-chord' : ''} ${isRoot ? 'is-root' : ''}`;
+                
+                if (isWhite) {
+                    div.innerHTML = `<span>${NOTES[noteAbs]}</span>`;
+                    kb.appendChild(div);
+                    currentWhiteIndex++;
+                } else {
+                    // Calculate absolute left position for black key
+                    // Width of one white key is (100 / totalWhiteKeys)%
+                    // Black key goes between previous white key and current white key
+                    const whiteWidthPercent = 100 / totalWhiteKeys;
+                    const prevWhiteGlobalIndex = (oct * 7) + blackKeyOffsets[noteAbs];
+                    
+                    div.style.left = `calc(${whiteWidthPercent * (prevWhiteGlobalIndex + 1)}% - 1.5%)`; 
+                    div.style.width = '3%'; // Fixed width for black keys relative to container
+                    
+                    div.innerHTML = `<span>${NOTES[noteAbs]}</span>`;
+                    kb.appendChild(div);
+                }
+
+                // Interaction
+                div.addEventListener('mousedown', () => {
+                    div.classList.add('active');
+                    playChordTone(noteAbs, oct + 3);
+                });
+                div.addEventListener('mouseup', () => div.classList.remove('active'));
+                div.addEventListener('mouseleave', () => div.classList.remove('active'));
+            }
+        }
+    }
+
+    function renderChords() {
+        const container = document.getElementById('chord-container');
+        container.innerHTML = '';
+        const numerals = SCALES[state.modeKey].numerals;
+
+        for (let i = 0; i < 7; i++) {
+            const chordNotes = getChordNotes(i);
+            const analysis = analyzeChord(chordNotes);
+            
+            const btn = document.createElement('button');
+            btn.className = "flex flex-col items-center justify-center p-3 bg-zinc-850 border border-zinc-700 hover:border-neon-blue hover:bg-zinc-800 rounded-lg transition-all text-center";
+            
+            // Adjust numeral for 7ths if needed
+            let displayNumeral = numerals[i];
+            if (state.useSevenths) displayNumeral += "7";
+
+            btn.innerHTML = `
+                <span class="text-xs font-semibold text-zinc-500 mb-1">${displayNumeral}</span>
+                <span class="text-xl font-bold text-white">${analysis.name}</span>
+            `;
+
+            btn.addEventListener('click', () => {
+                activateChord(chordNotes, analysis.name, displayNumeral, analysis.intervalsStruct);
+            });
+
+            container.appendChild(btn);
+        }
+    }
+
+    function activateChord(chordNotes, chordName, numeral, intervalStruct) {
+        state.activeArpeggio = chordNotes;
+        state.activeRootIndex = chordNotes[0];
+        
+        // Play audio
+        chordNotes.forEach((note, index) => {
+            // Simple voicing: keep root low, move others up if they wrap around
+            let oct = 3;
+            if (index > 0 && note <= chordNotes[0]) oct = 4; 
+            playChordTone(note, oct);
+        });
+
+        // Update Theory Panel
+        const panel = document.getElementById('theory-panel');
+        const notesNames = chordNotes.map(n => NOTES[n]).join(' - ');
+        const struct = intervalStruct.join(' - ');
+        
+        panel.innerHTML = `
+            <div class="border-b border-zinc-700 pb-2 mb-2">
+                <span class="block text-xs text-zinc-500 uppercase">Active Key</span>
+                <strong class="text-neon-blue text-lg">${NOTES[state.rootIndex]} ${SCALES[state.modeKey].name}</strong>
+            </div>
+            <div class="border-b border-zinc-700 pb-2 mb-2">
+                <span class="block text-xs text-zinc-500 uppercase">Selected Chord</span>
+                <strong class="text-neon-gold text-lg">${chordName} (${numeral})</strong>
+            </div>
+            <div>
+                <span class="block text-xs text-zinc-500 uppercase">Arpeggio Footprint</span>
+                <span class="text-zinc-200 block">${notesNames}</span>
+                <span class="text-zinc-400 text-xs tracking-wider block mt-1">[ ${struct} ]</span>
+            </div>
+        `;
+
+        renderKeyboard();
+    }
+
+    function resetTheoryPanel() {
+        const panel = document.getElementById('theory-panel');
+        panel.innerHTML = `
+            <div>
+                <span class="block text-xs text-zinc-500 uppercase">Active Key</span>
+                <strong class="text-neon-blue text-lg">${NOTES[state.rootIndex]} ${SCALES[state.modeKey].name}</strong>
+                <p class="text-zinc-400 mt-2 text-xs">Select a chord from the matrix to view intervallic breakdown.</p>
+            </div>
+        `;
+    }
+
+    /** --- 6. BINDINGS --- **/
+    function updateAll() {
+        state.rootIndex = NOTES.indexOf(document.getElementById('root-select').value);
+        state.modeKey = document.getElementById('mode-select').value;
+        state.useSevenths = document.getElementById('seventh-toggle').checked;
+        state.activeArpeggio = [];
+        state.activeRootIndex = null;
+        
+        calculateScale();
+        renderChords();
+        renderKeyboard();
+        resetTheoryPanel();
+    }
+
+    document.getElementById('root-select').addEventListener('change', updateAll);
+    document.getElementById('mode-select').addEventListener('change', updateAll);
+    document.getElementById('seventh-toggle').addEventListener('change', updateAll);
+    
+    document.getElementById('clear-kb').addEventListener('click', () => {
+        state.activeArpeggio = [];
+        state.activeRootIndex = null;
+        renderKeyboard();
+        resetTheoryPanel();
+    });
+
+    // Boot
+    updateAll();
+
+</script>
+</body>
+</html>
